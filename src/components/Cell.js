@@ -1,10 +1,8 @@
 const today = new Date();
 
 const Cell = ({day, month, year, outdated}) => {
-  
   const isCurrentDay = today.getMonth() === month && today.getFullYear() === year && day === today.getDate();
-  console.log(outdated);
-  // const isOutDate = 
+
   const style = {
     backgroundColor: isCurrentDay ? 'red' : 'white',
     color: isCurrentDay ? 'white' : outdated ? 'lightgray' : 'black',
