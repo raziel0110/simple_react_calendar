@@ -1,21 +1,47 @@
-import { useState } from "react";
+import { useReducer } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { WEEK_DAYS, CALENDAR_MONTHS, DAY_MILLI_SECONDS, } from "../helpers/utils";
 import Button from "./Button";
 import Cell from "./Cell";
 
 const today = new Date();
+const initialState = {
+  currentMonth: today.getMonth(),
+  currentYear: today.getFullYear(),
+}
+
+const reducer = (state, action) => {
+  switch(action.type) {
+    case "handleNextYear":
+      return {...state, currentYear: state.currentYear + 1}
+    case "handlePrevYear": 
+      return {...state, currentYear: state.currentYear - 1}
+    case "handlePrevMonth":
+      if (state.currentMonth < 1) {
+        return {currentYear: state.currentYear - 1, currentMonth: 11}
+      } else {
+        return {...state, currentMonth: state.currentMonth - 1}
+      }
+    case "handleNextMonth":
+      if(state.currentMonth > 10) {
+        return {currentYear: state.currentYear + 1, currentMonth: 0}
+      } else {
+        return {...state, currentMonth: state.currentMonth + 1}
+      }
+    default: 
+      return state;
+  }
+} 
 
 const DatePicker = () => {
   const {isDark, toggleTheme} = useTheme();
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [{currentMonth, currentYear}, dispatch] = useReducer(reducer, initialState);
 
   const numOfDaysInMonth = new Date(currentYear, currentMonth + 1, 0);
   const oudatedDays = currentMonth < today.getMonth() || currentYear < today.getFullYear()
 
   const currentMonthDays = () => {
-    return Array.from({length: numOfDaysInMonth.getDate()}).reduce((arr, curr, index) => {
+    return Array.from({length: numOfDaysInMonth.getDate()}).reduce((arr, _curr, index) => {
       arr.push(index + 1)
       return arr;
     }, []);
@@ -42,33 +68,23 @@ const DatePicker = () => {
   ]
 
   const handlePrevMonth = () => {
-    if(currentMonth < 1) {
-      setCurrentYear((currentYear) => currentYear - 1);
-      setCurrentMonth(12);
-    }
-    setCurrentMonth((currentMonth) => currentMonth - 1);
+    dispatch({type: 'handlePrevMonth'})
   }
 
   const handleNextMonth = () => {
-    if(currentMonth > 10) {
-      setCurrentYear((currentYear) => currentYear + 1);
-      setCurrentMonth(0);
-    } else {
-      setCurrentMonth((currentMonth) => currentMonth + 1);
-    }
+    dispatch({type: 'handleNextMonth'})
   }
 
   const handleNextYear = () => {
-    setCurrentYear((currentYear) => currentYear + 1);
+    dispatch({type: 'handleNextYear'})
   }
 
   const handlePrevYear = () => {
-    setCurrentYear((currentYear) => currentYear - 1);
+    dispatch({type: 'handlePrevYear'})
   }
 
   return (
     <>
-      
       <div style={{width: '300px', backgroundColor: '#fff', padding: '15px', borderRadius: '10px'}}>
         <div style={{marginBottom: '5px'}}>
           <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '20px'}}>
